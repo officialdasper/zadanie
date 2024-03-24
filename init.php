@@ -4,14 +4,14 @@
     use Bitrix\Main\Application;
     use Bitrix\Main\Entity;
 
-    // Регистрация агента
+    // Р РµРіРёСЃС‚СЂР°С†РёСЏ Р°РіРµРЅС‚Р°
     CAgent::AddAgent("ImportXMLAgent::checkXMLfiles();", "checkXMLfile", "N", 86400, "", "Y", "", 30);
 
     Loader::includeModule('iblock');
 
     class ImportXMLAgent {
         public static function checkXMLfiles() {
-            $xmlFolder = $_SERVER['DOCUMENT_ROOT'] . '/путь до файла/';
+            $xmlFolder = $_SERVER['DOCUMENT_ROOT'] . '/РїСѓС‚СЊ РґРѕ С„Р°Р№Р»Р°/';
             $xmlFiles = glob($xmlFolder . '*.xml');
             foreach($xmlFiles as $xmlFile) {
                 self::checkXMLfile($xmlFile);
@@ -19,7 +19,7 @@
         }
 
         /**
-         * @param $xmlFile // Обработка XML файла
+         * @param $xmlFile // РћР±СЂР°Р±РѕС‚РєР° XML С„Р°Р№Р»Р°
          *
          * @return void
          */
@@ -27,7 +27,7 @@
             $xmlData = simplexml_load_file($xmlFile);
             if($xmlData === false) return;
 
-            // Обработка данных из XML файла и обновление свойств элементов инфоблока
+            // РћР±СЂР°Р±РѕС‚РєР° РґР°РЅРЅС‹С… РёР· XML С„Р°Р№Р»Р° Рё РѕР±РЅРѕРІР»РµРЅРёРµ СЃРІРѕР№СЃС‚РІ СЌР»РµРјРµРЅС‚РѕРІ РёРЅС„РѕР±Р»РѕРєР°
             foreach($xmlData->Products->Product as $product) {
                 $code = (string)$product->Code;
                 $rest = (int)$product->Rest;
@@ -39,35 +39,35 @@
         }
 
         /**
-         * @param $code * Символьный код
-         * @param $rest * Значение с xml
+         * @param $code * РЎРёРјРІРѕР»СЊРЅС‹Р№ РєРѕРґ
+         * @param $rest * Р—РЅР°С‡РµРЅРёРµ СЃ xml
          *
          * @return string
          */
         private static function checkElementProperty($code, $rest) {
             $IBLOCK_ID = 1;
-            // Получаем значения свойств элемента по внешнему коду
+            // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёСЏ СЃРІРѕР№СЃС‚РІ СЌР»РµРјРµРЅС‚Р° РїРѕ РІРЅРµС€РЅРµРјСѓ РєРѕРґСѓ
             $res = CIBlockElement::GetList([], [
                 'IBLOCK_ID' => $IBLOCK_ID,
                 '=XML_ID' => $code,
-                'ACTIVE' => 'Y', // Учитываем только активные элементы
+                'ACTIVE' => 'Y', // РЈС‡РёС‚С‹РІР°РµРј С‚РѕР»СЊРєРѕ Р°РєС‚РёРІРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹
             ], false, false, ['ID', 'IBLOCK_ID', 'NAME']);
             if($element = $res->Fetch()) {
                 $ELEMENT_ID = $element['ID'];
 
-                // Получаем значение свойства по его символьному коду
+                // РџРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ СЃРІРѕР№СЃС‚РІР° РїРѕ РµРіРѕ СЃРёРјРІРѕР»СЊРЅРѕРјСѓ РєРѕРґСѓ
                 $propertyCode = 'PROPERTY_CODE';
                 $propertyValue = CIBlockElement::GetProperty($IBLOCK_ID, $ELEMENT_ID, [], ["CODE" => $propertyCode]);
 
-                // Обрабатываем значения свойства
+                // РћР±СЂР°Р±Р°С‚С‹РІР°РµРј Р·РЅР°С‡РµРЅРёСЏ СЃРІРѕР№СЃС‚РІР°
                 if($prop = $propertyValue->Fetch()) {
                     CIBlockElement::SetPropertyValuesEx($ELEMENT_ID, $IBLOCK_ID, [$propertyCode => $rest]);
-                    return "Значение свойства '{$propertyCode}' изменено на '{$rest}'";
+                    return "Р—РЅР°С‡РµРЅРёРµ СЃРІРѕР№СЃС‚РІР° '{$propertyCode}' РёР·РјРµРЅРµРЅРѕ РЅР° '{$rest}'";
                 } else {
-                    return "Свойство '{$propertyCode}' не найдено для элемента '{$element['NAME']}'";
+                    return "РЎРІРѕР№СЃС‚РІРѕ '{$propertyCode}' РЅРµ РЅР°Р№РґРµРЅРѕ РґР»СЏ СЌР»РµРјРµРЅС‚Р° '{$element['NAME']}'";
                 }
             } else {
-                return "Элемент с внешним кодом '{$code}' не найден";
+                return "Р­Р»РµРјРµРЅС‚ СЃ РІРЅРµС€РЅРёРј РєРѕРґРѕРј '{$code}' РЅРµ РЅР°Р№РґРµРЅ";
             }
         }
     }
